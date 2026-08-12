@@ -92,7 +92,8 @@ akazeika1886_a4:
 @ Input: r0 = status, r1 = num_to_skip (unused for now), r2 = direction (unused for now)
 @ Returns: r0 = 1 (success)
 @
-@ Saves status into a5_running and turns off all 8 LEDs before starting.
+@ Saves status into a5_running, turns off all 8 LEDs, then initializes
+@ and starts the independent watchdog (reload = 8000).
 akazeika1886_a5:
     push {r4, lr}
 
@@ -109,6 +110,12 @@ akazeika1886_a5:
         add r4, r4, #1
         b a5_off_loop
     a5_off_done:
+
+    @ Initialize the independent watchdog with a reload value of 8000,
+    @ then start the countdown
+    ldr r0, =8000
+    bl mes_InitIWDG
+    bl mes_IWDGStart
 
     mov r0, #1
     pop {r4, lr}
@@ -146,9 +153,8 @@ akazeika1886_a4_btn:
 @ Input: None
 @ Returns: Nothing
 @
-@ Kept for reference / demonstration purposes. No longer called
-@ automatically from the C hook (akazeika1886_tick now calls
-@ akazeika1886_a5_tick instead) -- see A5 assignment instructions.
+@ No longer called automatically from the C hook (akazeika1886_tick now
+@ calls akazeika1886_a5_tick instead) -- kept here for reference.
 akazeika1886_a4_tick:
     push {r4, lr}
 
@@ -213,7 +219,7 @@ akazeika1886_a5_tick:
     @ DO NOT PUT LOGIC FOR A5 ABOVE THIS LINE ------------------------
 
     @ Toggle the 4 corner LEDs (Upper Left/Right, Lower Left/Right) in
-    @ one operation, via direct GPIOE ODR register access (no BSP call).
+    @ one operation, via direct GPIOE ODR register access (no BSP call)
     ldr r1, =GPIOE_ODR
     ldr r0, [r1]
     ldr r2, =LEDS_CORNERS_MASK
@@ -231,7 +237,7 @@ akazeika1886_a5_tick:
 @ Function Declaration : int busy_delay(int cycles)
 @ Input: r0 = number of cycles to delay
 @ Returns: r0
-@ DO NOT MODIFY. DO NOT CALL FROM A4/A5 CODE (assignments require no busy_delay).
+@ Legacy delay helper from earlier labs, not used by A4/A5 logic
 busy_delay:
     push {r6}
     mov r6, r0
