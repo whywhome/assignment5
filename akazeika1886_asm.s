@@ -8,6 +8,10 @@
 
     .align  2
     .syntax unified
+
+.equ GPIOE_ODR, 0x48001014          @ Address of GPIOE->ODR (output data register)
+.equ LEDS_CORNERS_MASK, 0x5500      @ Bits 8,10,12,14 = LED4(NW,UL) LED5(NE,UR) LED9(SE,LR) LED8(SW,LL)
+
     .global akazeika1886_lab8
     .code   16
     .thumb_func
@@ -207,8 +211,15 @@ akazeika1886_a5_tick:
     ble a5_skip
 
     @ DO NOT PUT LOGIC FOR A5 ABOVE THIS LINE ------------------------
-    mov r0, #0
-    bl BSP_LED_Toggle
+
+    @ Toggle the 4 corner LEDs (Upper Left/Right, Lower Left/Right) in
+    @ one operation, via direct GPIOE ODR register access (no BSP call).
+    ldr r1, =GPIOE_ODR
+    ldr r0, [r1]
+    ldr r2, =LEDS_CORNERS_MASK
+    eor r0, r0, r2
+    str r0, [r1]
+
     @ DO NOT PUT LOGIC FOR A5 BELOW THIS LINE ------------------------
 
     a5_skip:
