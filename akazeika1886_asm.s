@@ -1,7 +1,4 @@
 @ Assembly File - Assignment 4/5
-@
-@ NOTE THERE IS A DATA SECTION AT THE END OF THIS FILE FOR ASSIGNMENT 4
-@ USE THAT DATA SECTION FOR ANY DATA YOU NEED, DO NOT ADD ANOTHER.
 
     .code   16
     .text
@@ -217,6 +214,9 @@ akazeika1886_a5_tick:
     ble a5_skip
 
     @ DO NOT PUT LOGIC FOR A5 ABOVE THIS LINE ------------------------
+
+    @ Confirm to the watchdog that the system is still alive
+    bl mes_IWDGRefresh
 
     @ Toggle the 4 corner LEDs (Upper Left/Right, Lower Left/Right) in
     @ one operation, via direct GPIOE ODR register access (no BSP call)
