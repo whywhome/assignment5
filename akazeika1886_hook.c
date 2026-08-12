@@ -13,12 +13,12 @@
 
 #define N 500
 
-// A4 functions - implemented in akazeika1886_asm.s
-void akazeika1886_a4_btn(void);
+// A4 function - implemented in akazeika1886_asm.s
 void akazeika1886_a4_tick(void);
 
-// A5 function - implemented in akazeika1886_asm.s
+// A5 functions - implemented in akazeika1886_asm.s
 void akazeika1886_a5_tick(void);
+void akazeika1886_a5_btn(void);
 
 // Timer tick hook for our interrupt driven programming.
 // Called from SysTick_Handler in main.c on every system tick.
@@ -38,7 +38,7 @@ void akazeika1886_tick(void)
 // Button press hook. Called from EXTI0_IRQHandler in main.c.
 void akazeika1886_btn(void)
 {
-  akazeika1886_a4_btn();
+  akazeika1886_a5_btn();
 }
 
 int akazeika1886_lab8(void);

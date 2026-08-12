@@ -120,27 +120,20 @@ akazeika1886_a5:
     .size akazeika1886_a5, .-akazeika1886_a5
 
 
-.global akazeika1886_a4_btn
-.type   akazeika1886_a4_btn, %function
+.global akazeika1886_a5_btn
+.type   akazeika1886_a5_btn, %function
 
-@ Function Declaration : void akazeika1886_a4_btn(void)
+@ Function Declaration : void akazeika1886_a5_btn(void)
 @ Input: None
 @ Returns: Nothing
 @ Requires BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI) in main.c
-akazeika1886_a4_btn:
-    push {lr}
-
-    ldr r1, =a4_button_count
-    ldr r0, [r1]
-    add r0, r0, #1
-    and r0, #7
+@ Sets a5_btn_pressed so akazeika1886_a5_tick stops refreshing the watchdog
+akazeika1886_a5_btn:
+    ldr r1, =a5_btn_pressed
+    mov r0, #1
     str r0, [r1]
-
-    bl BSP_LED_Toggle
-
-    pop {lr}
     bx lr
-    .size   akazeika1886_a4_btn, .-akazeika1886_a4_btn
+    .size   akazeika1886_a5_btn, .-akazeika1886_a5_btn
 
 
 .global akazeika1886_a4_tick
@@ -215,8 +208,13 @@ akazeika1886_a5_tick:
 
     @ DO NOT PUT LOGIC FOR A5 ABOVE THIS LINE ------------------------
 
-    @ Confirm to the watchdog that the system is still alive
-    bl mes_IWDGRefresh
+    @ Skip refreshing the watchdog once the button has been pressed
+    ldr r1, =a5_btn_pressed
+    ldr r2, [r1]
+    cmp r2, #0
+    bne a5_skip_refresh
+        bl mes_IWDGRefresh
+    a5_skip_refresh:
 
     @ Toggle the 4 corner LEDs (Upper Left/Right, Lower Left/Right) in
     @ one operation, via direct GPIOE ODR register access (no BSP call)
@@ -257,7 +255,7 @@ a4_num_to_skip:  .word 0    @ tick calls to skip between actions
 a4_direction:    .word 1    @ +1 or -1 (default +1); 0 is never stored here
 a4_skip_counter: .word 0    @ calls skipped since the last action
 a4_current_led:  .word 0    @ index of the currently active LED (0-7)
-a4_button_count: .word 0    @ used only by akazeika1886_a4_btn
 a5_running:      .word 0    @ >0 = running, <=0 = stopped (A5)
+a5_btn_pressed:  .word 0    @ 0 = not pressed, non-zero = pressed (set by akazeika1886_a5_btn)
 
 .end
